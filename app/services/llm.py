@@ -1,3 +1,4 @@
+import json
 import logging
 from collections.abc import AsyncIterator
 
@@ -63,6 +64,10 @@ async def stream_chat(session_id: str, user_message: str) -> AsyncIterator[str]:
         "Chat request session=%s model=%s history_len=%d rag_results=%d",
         session_id, settings.do_model, len(history), len(products),
     )
+
+    if products:
+        sources = [{"id": p["product_id"], "name": p["name"]} for p in products]
+        yield "__SOURCES__:" + json.dumps({"sources": sources}) + "\n"
 
     full_response: list[str] = []
     stream_started = False

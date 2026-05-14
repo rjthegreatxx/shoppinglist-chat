@@ -133,6 +133,21 @@
     }
 
     #search-empty { color: #888; font-size: 0.9rem; text-align: center; margin-top: 2rem; }
+
+    /* RAG sources */
+    .rag-sources {
+      align-self: flex-start;
+      display: flex; flex-wrap: wrap; gap: 0.3rem;
+      max-width: 80%; padding: 0.3rem 0;
+    }
+    .sources-label {
+      font-size: 0.72rem; color: #888; font-weight: 500;
+      margin-right: 0.2rem; white-space: nowrap; align-self: center;
+    }
+    .source-tag {
+      font-size: 0.7rem; background: #eef3ff; color: #0a84ff;
+      border-radius: 4px; padding: 0.15rem 0.45rem; white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -205,6 +220,25 @@
     return el;
   }
 
+  function addSourcesPanel(sources) {
+    const el = document.createElement("div");
+    el.className = "rag-sources";
+    const label = document.createElement("span");
+    label.className = "sources-label";
+    label.textContent = "Sources:";
+    el.appendChild(label);
+    sources.forEach(s => {
+      const tag = document.createElement("span");
+      tag.className = "source-tag";
+      tag.title = s.id;
+      tag.textContent = s.name;
+      el.appendChild(tag);
+    });
+    chatWindow.appendChild(el);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+    return el;
+  }
+
   async function sendMessage() {
     const text = input.value.trim();
     if (!text || sendBtn.disabled) return;
@@ -234,14 +268,35 @@
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let content = "";
+      let sourcesExtracted = false;
+      let sourcesPanel = null;
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         content += decoder.decode(value, { stream: true });
+
+        if (!sourcesExtracted) {
+          const nlIdx = content.indexOf("\n");
+          if (nlIdx !== -1) {
+            const firstLine = content.slice(0, nlIdx);
+            if (firstLine.startsWith("__SOURCES__:")) {
+              try {
+                const meta = JSON.parse(firstLine.slice("__SOURCES__:".length));
+                if (meta.sources?.length) sourcesPanel = addSourcesPanel(meta.sources);
+              } catch (_) {}
+              content = content.slice(nlIdx + 1);
+            }
+            sourcesExtracted = true;
+          }
+        }
+
         assistantBubble.textContent = content;
         chatWindow.scrollTop = chatWindow.scrollHeight;
       }
+
+      // Move sources panel after the bubble so it appears below
+      if (sourcesPanel) chatWindow.appendChild(sourcesPanel);
     } catch (err) {
       assistantBubble.textContent = "Connection error. Please try again.";
     } finally {
