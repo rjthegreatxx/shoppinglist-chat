@@ -244,6 +244,20 @@
     chatWindow.innerHTML = "";
     input.focus();
   });
+
+  async function loadHistory() {
+    try {
+      const res = await fetch(`/history/${sessionId}`);
+      if (!res.ok) return;
+      const messages = await res.json();
+      messages.forEach(({ role, content }) => {
+        if (role === "user" || role === "assistant") addBubble(role, content);
+      });
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    } catch (_) {}
+  }
+
+  loadHistory();
 </script>
 </body>
 </html>
