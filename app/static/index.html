@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shopping List Chat</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100dvh;
+      padding: 1rem;
+    }
+
+    header {
+      width: 100%;
+      max-width: 760px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      margin-bottom: 0.5rem;
+    }
+
+    header h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    #session-label {
+      font-size: 0.75rem;
+      color: #888;
+    }
+
+    #clear-btn {
+      font-size: 0.75rem;
+      color: #888;
+      background: none;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 0.25rem 0.6rem;
+      cursor: pointer;
+    }
+    #clear-btn:hover { background: #e8e8e8; }
+
+    #chat-window {
+      flex: 1;
+      width: 100%;
+      max-width: 760px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .bubble {
+      max-width: 80%;
+      padding: 0.65rem 0.9rem;
+      border-radius: 14px;
+      line-height: 1.5;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .bubble.user {
+      align-self: flex-end;
+      background: #0a84ff;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bubble.assistant {
+      align-self: flex-start;
+      background: #fff;
+      color: #1a1a1a;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .bubble.assistant.streaming::after {
+      content: "▋";
+      animation: blink 0.7s step-start infinite;
+      margin-left: 2px;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+
+    #input-area {
+      width: 100%;
+      max-width: 760px;
+      display: flex;
+      gap: 0.5rem;
+      padding-top: 0.75rem;
+    }
+
+    #message-input {
+      flex: 1;
+      padding: 0.7rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      resize: none;
+      outline: none;
+      background: #fff;
+      max-height: 140px;
+      line-height: 1.4;
+    }
+    #message-input:focus { border-color: #0a84ff; }
+
+    #send-btn {
+      padding: 0.7rem 1.2rem;
+      background: #0a84ff;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      align-self: flex-end;
+      transition: background 0.15s;
+    }
+    #send-btn:hover:not(:disabled) { background: #006edc; }
+    #send-btn:disabled { background: #aaa; cursor: default; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Shopping List Chat</h1>
+  <div style="display:flex;align-items:center;gap:0.75rem;">
+    <span id="session-label"></span>
+    <button id="clear-btn">New chat</button>
+  </div>
+</header>
+
+<div id="chat-window"></div>
+
+<div id="input-area">
+  <textarea
+    id="message-input"
+    rows="1"
+    placeholder="Type a message…"
+    autofocus
+  ></textarea>
+  <button id="send-btn">Send</button>
+</div>
+
+<script>
+  const chatWindow   = document.getElementById("chat-window");
+  const input        = document.getElementById("message-input");
+  const sendBtn      = document.getElementById("send-btn");
+  const clearBtn     = document.getElementById("clear-btn");
+  const sessionLabel = document.getElementById("session-label");
+
+  function newSessionId() {
+    return "session-" + Math.random().toString(36).slice(2, 10);
+  }
+
+  let sessionId = localStorage.getItem("chat_session_id") || newSessionId();
+  localStorage.setItem("chat_session_id", sessionId);
+  sessionLabel.textContent = sessionId;
+
+  function addBubble(role, text = "") {
+    const el = document.createElement("div");
+    el.className = `bubble ${role}`;
+    el.textContent = text;
+    chatWindow.appendChild(el);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+    return el;
+  }
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text || sendBtn.disabled) return;
+
+    input.value = "";
+    input.style.height = "auto";
+    sendBtn.disabled = true;
+
+    addBubble("user", text);
+    const assistantBubble = addBubble("assistant");
+    assistantBubble.classList.add("streaming");
+
+    try {
+      const response = await fetch(`/chat/${sessionId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text }),
+      });
+
+      if (!response.ok) {
+        const err = await response.text();
+        assistantBubble.textContent = `Error ${response.status}: ${err}`;
+        assistantBubble.classList.remove("streaming");
+        return;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let content = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        content += decoder.decode(value, { stream: true });
+        assistantBubble.textContent = content;
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+      }
+    } catch (err) {
+      assistantBubble.textContent = "Connection error. Please try again.";
+    } finally {
+      assistantBubble.classList.remove("streaming");
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  }
+
+  sendBtn.addEventListener("click", sendMessage);
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  input.addEventListener("input", () => {
+    input.style.height = "auto";
+    input.style.height = input.scrollHeight + "px";
+  });
+
+  clearBtn.addEventListener("click", () => {
+    sessionId = newSessionId();
+    localStorage.setItem("chat_session_id", sessionId);
+    sessionLabel.textContent = sessionId;
+    chatWindow.innerHTML = "";
+    input.focus();
+  });
+</script>
+</body>
+</html>
