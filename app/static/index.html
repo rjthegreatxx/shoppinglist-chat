@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shopping List Chat</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked@13/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -67,16 +69,31 @@
     .bubble {
       max-width: 80%; padding: 0.65rem 0.9rem;
       border-radius: 14px; line-height: 1.5;
-      font-size: 0.95rem; white-space: pre-wrap; word-break: break-word;
+      font-size: 0.95rem; word-break: break-word;
     }
     .bubble.user {
       align-self: flex-end; background: #0a84ff; color: #fff;
-      border-bottom-right-radius: 4px;
+      border-bottom-right-radius: 4px; white-space: pre-wrap;
     }
     .bubble.assistant {
       align-self: flex-start; background: #fff; color: #1a1a1a;
       border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
+    /* Markdown content inside assistant bubbles */
+    .bubble.assistant p { margin: 0 0 0.5rem; }
+    .bubble.assistant p:last-child { margin-bottom: 0; }
+    .bubble.assistant ul, .bubble.assistant ol { padding-left: 1.3rem; margin: 0 0 0.5rem; }
+    .bubble.assistant li { margin-bottom: 0.2rem; }
+    .bubble.assistant strong { font-weight: 600; }
+    .bubble.assistant code {
+      background: #f0f2f5; border-radius: 4px;
+      padding: 0.1rem 0.35rem; font-size: 0.88em; font-family: monospace;
+    }
+    .bubble.assistant pre {
+      background: #f0f2f5; border-radius: 8px; padding: 0.7rem;
+      overflow-x: auto; margin: 0.4rem 0;
+    }
+    .bubble.assistant pre code { background: none; padding: 0; }
     .bubble.assistant.streaming::after {
       content: "▋"; animation: blink 0.7s step-start infinite; margin-left: 2px;
     }
@@ -186,6 +203,12 @@
 </div>
 
 <script>
+  // ── Markdown rendering ─────────────────────────────────────────
+  marked.setOptions({ breaks: true });
+  function renderMarkdown(el, text) {
+    el.innerHTML = DOMPurify.sanitize(marked.parse(text));
+  }
+
   // ── Tab switching ──────────────────────────────────────────────
   document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -214,7 +237,11 @@
   function addBubble(role, text = "") {
     const el = document.createElement("div");
     el.className = `bubble ${role}`;
-    el.textContent = text;
+    if (text && role === "assistant") {
+      renderMarkdown(el, text);
+    } else {
+      el.textContent = text;
+    }
     chatWindow.appendChild(el);
     chatWindow.scrollTop = chatWindow.scrollHeight;
     return el;
@@ -295,6 +322,7 @@
         chatWindow.scrollTop = chatWindow.scrollHeight;
       }
 
+      renderMarkdown(assistantBubble, content);
       // Move sources panel after the bubble so it appears below
       if (sourcesPanel) chatWindow.appendChild(sourcesPanel);
     } catch (err) {

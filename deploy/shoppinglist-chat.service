@@ -1,0 +1,15 @@
+[Unit]
+Description=Shopping List Chat
+After=network.target
+
+[Service]
+Type=simple
+User=rj
+WorkingDirectory=/home/rj/projects/ai-lab/shoppinglist-chat
+ExecStart=/home/rj/projects/ai-lab/shoppinglist-chat/.venv/bin/python run.py
+Restart=on-failure
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
