@@ -25,14 +25,16 @@ async def stream_chat(session_id: str, user_message: str) -> AsyncIterator[str]:
 
     full_response = []
 
-    async with client.chat.completions.stream(
+    stream = await client.chat.completions.create(
         model=MODEL,
         messages=messages,
-    ) as stream:
-        async for chunk in stream:
-            delta = chunk.choices[0].delta.content if chunk.choices else None
-            if delta:
-                full_response.append(delta)
-                yield delta
+        stream=True,
+    )
+
+    async for chunk in stream:
+        delta = chunk.choices[0].delta.content if chunk.choices else None
+        if delta:
+            full_response.append(delta)
+            yield delta
 
     save_message(session_id, "assistant", "".join(full_response))
