@@ -24,111 +24,115 @@
       align-items: center;
       justify-content: space-between;
       padding: 0.75rem 0;
-      margin-bottom: 0.5rem;
     }
 
-    header h1 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #1a1a1a;
-    }
+    header h1 { font-size: 1.1rem; font-weight: 600; color: #1a1a1a; }
 
-    #session-label {
-      font-size: 0.75rem;
-      color: #888;
-    }
+    #session-label { font-size: 0.75rem; color: #888; }
 
     #clear-btn {
-      font-size: 0.75rem;
-      color: #888;
-      background: none;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      padding: 0.25rem 0.6rem;
-      cursor: pointer;
+      font-size: 0.75rem; color: #888; background: none;
+      border: 1px solid #ddd; border-radius: 6px;
+      padding: 0.25rem 0.6rem; cursor: pointer;
     }
     #clear-btn:hover { background: #e8e8e8; }
 
+    /* Tab bar */
+    .tabs {
+      width: 100%; max-width: 760px;
+      display: flex; gap: 0.25rem;
+      border-bottom: 2px solid #e0e0e0;
+      margin-bottom: 0.75rem;
+    }
+    .tab-btn {
+      padding: 0.5rem 1rem; background: none; border: none;
+      font-size: 0.9rem; color: #888; cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -2px;
+      transition: color 0.15s;
+    }
+    .tab-btn.active { color: #0a84ff; border-bottom-color: #0a84ff; font-weight: 500; }
+    .tab-btn:hover:not(.active) { color: #444; }
+
+    /* Panels */
+    .panel { display: none; flex: 1; flex-direction: column; width: 100%; max-width: 760px; }
+    .panel.active { display: flex; }
+
+    /* Chat */
     #chat-window {
-      flex: 1;
-      width: 100%;
-      max-width: 760px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      padding-bottom: 0.5rem;
+      flex: 1; overflow-y: auto;
+      display: flex; flex-direction: column;
+      gap: 0.75rem; padding-bottom: 0.5rem;
     }
 
     .bubble {
-      max-width: 80%;
-      padding: 0.65rem 0.9rem;
-      border-radius: 14px;
-      line-height: 1.5;
-      font-size: 0.95rem;
-      white-space: pre-wrap;
-      word-break: break-word;
+      max-width: 80%; padding: 0.65rem 0.9rem;
+      border-radius: 14px; line-height: 1.5;
+      font-size: 0.95rem; white-space: pre-wrap; word-break: break-word;
     }
-
     .bubble.user {
-      align-self: flex-end;
-      background: #0a84ff;
-      color: #fff;
+      align-self: flex-end; background: #0a84ff; color: #fff;
       border-bottom-right-radius: 4px;
     }
-
     .bubble.assistant {
-      align-self: flex-start;
-      background: #fff;
-      color: #1a1a1a;
-      border-bottom-left-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      align-self: flex-start; background: #fff; color: #1a1a1a;
+      border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
-
     .bubble.assistant.streaming::after {
-      content: "▋";
-      animation: blink 0.7s step-start infinite;
-      margin-left: 2px;
+      content: "▋"; animation: blink 0.7s step-start infinite; margin-left: 2px;
     }
-
     @keyframes blink { 50% { opacity: 0; } }
 
     #input-area {
-      width: 100%;
-      max-width: 760px;
-      display: flex;
-      gap: 0.5rem;
-      padding-top: 0.75rem;
+      width: 100%; display: flex; gap: 0.5rem; padding-top: 0.75rem;
     }
-
     #message-input {
-      flex: 1;
-      padding: 0.7rem 1rem;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      resize: none;
-      outline: none;
-      background: #fff;
-      max-height: 140px;
-      line-height: 1.4;
+      flex: 1; padding: 0.7rem 1rem; border: 1px solid #ddd;
+      border-radius: 12px; font-size: 0.95rem; resize: none; outline: none;
+      background: #fff; max-height: 140px; line-height: 1.4;
     }
     #message-input:focus { border-color: #0a84ff; }
 
     #send-btn {
-      padding: 0.7rem 1.2rem;
-      background: #0a84ff;
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      font-weight: 500;
-      cursor: pointer;
-      align-self: flex-end;
-      transition: background 0.15s;
+      padding: 0.7rem 1.2rem; background: #0a84ff; color: #fff;
+      border: none; border-radius: 12px; font-size: 0.95rem;
+      font-weight: 500; cursor: pointer; align-self: flex-end; transition: background 0.15s;
     }
     #send-btn:hover:not(:disabled) { background: #006edc; }
     #send-btn:disabled { background: #aaa; cursor: default; }
+
+    /* Search panel */
+    #search-bar {
+      display: flex; gap: 0.5rem; margin-bottom: 1rem;
+    }
+    #search-input {
+      flex: 1; padding: 0.7rem 1rem; border: 1px solid #ddd;
+      border-radius: 12px; font-size: 0.95rem; outline: none; background: #fff;
+    }
+    #search-input:focus { border-color: #0a84ff; }
+    #search-btn {
+      padding: 0.7rem 1.2rem; background: #0a84ff; color: #fff;
+      border: none; border-radius: 12px; font-size: 0.95rem;
+      font-weight: 500; cursor: pointer; transition: background 0.15s;
+      white-space: nowrap;
+    }
+    #search-btn:hover:not(:disabled) { background: #006edc; }
+    #search-btn:disabled { background: #aaa; cursor: default; }
+
+    #search-results { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .product-card {
+      background: #fff; border-radius: 12px; padding: 0.9rem 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .product-card .product-name { font-weight: 600; font-size: 0.95rem; color: #1a1a1a; }
+    .product-card .product-id { font-size: 0.75rem; color: #888; margin-bottom: 0.35rem; }
+    .product-card .product-desc { font-size: 0.88rem; color: #444; line-height: 1.5; }
+    .product-card .product-score {
+      font-size: 0.72rem; color: #0a84ff; font-weight: 500;
+      margin-top: 0.4rem;
+    }
+
+    #search-empty { color: #888; font-size: 0.9rem; text-align: center; margin-top: 2rem; }
   </style>
 </head>
 <body>
@@ -141,19 +145,43 @@
   </div>
 </header>
 
-<div id="chat-window"></div>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="chat">Chat</button>
+  <button class="tab-btn" data-tab="search">Product Search</button>
+</div>
 
-<div id="input-area">
-  <textarea
-    id="message-input"
-    rows="1"
-    placeholder="Type a message…"
-    autofocus
-  ></textarea>
-  <button id="send-btn">Send</button>
+<!-- Chat Panel -->
+<div class="panel active" id="panel-chat">
+  <div id="chat-window"></div>
+  <div id="input-area">
+    <textarea id="message-input" rows="1" placeholder="Type a message…" autofocus></textarea>
+    <button id="send-btn">Send</button>
+  </div>
+</div>
+
+<!-- Search Panel -->
+<div class="panel" id="panel-search">
+  <div id="search-bar">
+    <input id="search-input" type="text" placeholder="Search products (e.g. wound dressing, IV catheter)…" />
+    <button id="search-btn">Search</button>
+  </div>
+  <div id="search-results">
+    <p id="search-empty">Enter a search term to find products.</p>
+  </div>
 </div>
 
 <script>
+  // ── Tab switching ──────────────────────────────────────────────
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(`panel-${btn.dataset.tab}`).classList.add("active");
+    });
+  });
+
+  // ── Chat ───────────────────────────────────────────────────────
   const chatWindow   = document.getElementById("chat-window");
   const input        = document.getElementById("message-input");
   const sendBtn      = document.getElementById("send-btn");
@@ -224,19 +252,13 @@
   }
 
   sendBtn.addEventListener("click", sendMessage);
-
   input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   });
-
   input.addEventListener("input", () => {
     input.style.height = "auto";
     input.style.height = input.scrollHeight + "px";
   });
-
   clearBtn.addEventListener("click", () => {
     sessionId = newSessionId();
     localStorage.setItem("chat_session_id", sessionId);
@@ -258,6 +280,62 @@
   }
 
   loadHistory();
+
+  // ── Product Search ─────────────────────────────────────────────
+  const searchInput   = document.getElementById("search-input");
+  const searchBtn     = document.getElementById("search-btn");
+  const searchResults = document.getElementById("search-results");
+  const searchEmpty   = document.getElementById("search-empty");
+
+  async function doSearch() {
+    const query = searchInput.value.trim();
+    if (!query) return;
+
+    searchBtn.disabled = true;
+    searchBtn.textContent = "Searching…";
+    searchResults.innerHTML = "";
+
+    try {
+      const res = await fetch("/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query, top_k: 10 }),
+      });
+
+      if (!res.ok) {
+        searchResults.innerHTML = `<p id="search-empty">Error ${res.status}. Please try again.</p>`;
+        return;
+      }
+
+      const products = await res.json();
+      if (!products.length) {
+        searchResults.innerHTML = `<p id="search-empty">No products found for "${query}".</p>`;
+        return;
+      }
+
+      products.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+        card.innerHTML = `
+          <div class="product-name">${p.name}</div>
+          <div class="product-id">ID: ${p.product_id}</div>
+          <div class="product-desc">${p.description}</div>
+          <div class="product-score">Relevance: ${(p.score * 100).toFixed(0)}%</div>
+        `;
+        searchResults.appendChild(card);
+      });
+    } catch (err) {
+      searchResults.innerHTML = `<p id="search-empty">Connection error. Please try again.</p>`;
+    } finally {
+      searchBtn.disabled = false;
+      searchBtn.textContent = "Search";
+    }
+  }
+
+  searchBtn.addEventListener("click", doSearch);
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") doSearch();
+  });
 </script>
 </body>
 </html>

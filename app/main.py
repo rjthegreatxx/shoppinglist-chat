@@ -12,6 +12,7 @@ from app.services.history import close_db, init_db
 from app.services.llm import init_openai
 from app.services.vector import init_qdrant
 from app.routes.chat import router as chat_router
+from app.routes.search import router as search_router
 
 STATIC_DIR = Path(__file__).parent / "static"
 
@@ -44,6 +45,7 @@ app.add_middleware(
 )
 
 app.include_router(chat_router)
+app.include_router(search_router)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
