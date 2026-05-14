@@ -5,6 +5,7 @@ from openai import AsyncOpenAI
 
 from app.config import settings
 from app.services.history import get_history, save_message
+from app.services.vector import format_context, search_products
 
 logger = logging.getLogger(__name__)
 
@@ -13,16 +14,31 @@ client = AsyncOpenAI(
     base_url=settings.do_inference_base_url,
 )
 
-SYSTEM_PROMPT = "You are a helpful assistant."
+SYSTEM_PROMPT = (
+    "You are a helpful medical supply assistant. "
+    "When relevant products are provided in the context, reference them specifically in your response. "
+    "Always include product names and IDs when recommending items."
+)
 
 
 async def stream_chat(session_id: str, user_message: str) -> AsyncIterator[str]:
     history = await get_history(session_id)
+
+    products = await search_products(user_message)
+    context = format_context(products)
+
+    user_content = user_message
+    if context:
+        user_content = f"{context}\n\nUSER REQUEST: {user_message}"
+
     messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history + [
-        {"role": "user", "content": user_message}
+        {"role": "user", "content": user_content}
     ]
 
-    logger.info("Chat request session=%s model=%s history_len=%d", session_id, settings.do_model, len(history))
+    logger.info(
+        "Chat request session=%s model=%s history_len=%d rag_results=%d",
+        session_id, settings.do_model, len(history), len(products),
+    )
 
     full_response: list[str] = []
     stream_started = False

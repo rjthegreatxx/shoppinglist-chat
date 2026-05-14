@@ -5,6 +5,8 @@ class Settings(BaseSettings):
     do_inference_api_key: str
     do_inference_base_url: str = "https://inference.do-ai.run/v1"
     do_model: str = "llama3.3-70b-instruct"
+    qdrant_url: str = ""
+    qdrant_api_key: str = ""
     cors_origins: list[str] = ["*"]
     env: str = "dev"
 
