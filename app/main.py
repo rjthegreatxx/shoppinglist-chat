@@ -9,6 +9,8 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.services.history import close_db, init_db
+from app.services.llm import init_openai
+from app.services.vector import init_qdrant
 from app.routes.chat import router as chat_router
 
 STATIC_DIR = Path(__file__).parent / "static"
@@ -24,6 +26,8 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    init_openai()
+    init_qdrant()
     logger.info("App startup complete env=%s model=%s", settings.env, settings.do_model)
     yield
     await close_db()
