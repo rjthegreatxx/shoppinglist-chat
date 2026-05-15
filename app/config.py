@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     rag_top_k: int = 5
     rag_score_threshold: float = 0.3
 
+    stripe_secret_key: str = ""
+    stripe_webhook_secret: str = ""
+    stripe_success_url: str = "http://localhost:3000/checkout/success"
+    stripe_cancel_url: str = "http://localhost:3000/checkout/cancel"
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     @property

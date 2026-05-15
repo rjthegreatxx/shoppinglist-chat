@@ -6,3 +6,4 @@ aiosqlite==0.20.0
 qdrant-client>=1.9.0
 pydantic-settings==2.5.2
 python-dotenv==1.0.1
+stripe>=9.0.0

@@ -15,3 +15,17 @@ class ProductResult(BaseModel):
     name: str
     description: str
     score: float
+
+
+class CheckoutItem(BaseModel):
+    product_id: str = Field(..., min_length=1, max_length=50)
+    name: str = Field(..., min_length=1, max_length=200)
+    quantity: int = Field(..., ge=1, le=100)
+
+
+class CheckoutRequest(BaseModel):
+    items: list[CheckoutItem] = Field(..., min_length=1)
+
+
+class CheckoutResponse(BaseModel):
+    url: str
